@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
 export async function POST(req: NextRequest) {
   if (!process.env.OPENAI_API_KEY) {
     return NextResponse.json({ message: null, question: null });
   }
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
   const { company, position, interviewRound, interviewerType, interviewFormat, questions } = await req.json();
 
