@@ -200,7 +200,7 @@ function QuestionsTab({ review }: { review: InterviewReview }) {
           >
             <div className="flex items-center justify-between gap-3">
               <p className="text-[14px] font-semibold text-black">{q.question}</p>
-              <span className={`text-[#999999] text-[18px] leading-none shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+              <span className={`text-[#999999] text-[18px] leading-none shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}>
                 ›
               </span>
             </div>
