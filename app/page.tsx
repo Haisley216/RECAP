@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { InterviewReview } from '@/lib/types';
 import { getReviews } from '@/lib/storage';
 import { track, Events } from '@/lib/analytics';
@@ -10,21 +9,19 @@ import ReviewCard from '@/components/home/ReviewCard';
 
 export default function HomePage() {
   const router = useRouter();
-  const { status } = useSession();
   const [reviews, setReviews] = useState<InterviewReview[]>([]);
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    if (status === 'loading') return;
     const isAnonymous = localStorage.getItem('anonymous') === 'true';
-    if (status === 'unauthenticated' && !isAnonymous) {
+    if (!isAnonymous) {
       router.replace('/login');
       return;
     }
     setAuthChecked(true);
     setReviews(getReviews());
     track(Events.APP_REVISIT);
-  }, [status, router]);
+  }, [router]);
 
   const handleNewReview = () => {
     track(Events.START_REVIEW);
