@@ -243,7 +243,6 @@ export default function NewReviewPage() {
       // AI 분석 실패해도 복기 데이터는 저장됨
     }
 
-    setLoading(false);
     router.push(`/review/${review.id}`);
   };
 
