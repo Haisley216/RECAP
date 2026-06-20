@@ -20,7 +20,7 @@ export default function HomePage() {
     }
     setAuthChecked(true);
     setReviews(getReviews());
-    track(Events.APP_REVISIT);
+    track(Events.SERVICE_REVISIT);
   }, [router]);
 
   const handleNewReview = () => {

@@ -39,7 +39,7 @@ export default function ReportPage() {
     const data = getReview(id);
     if (!data) { router.replace('/'); return; }
     setReview(data);
-    track(Events.REPORT_VIEWED, { review_id: id });
+    track(Events.REVIEW_COMPLETED, { review_id: id });
   }, [id, router]);
 
   if (!review) return null;
@@ -48,7 +48,7 @@ export default function ReportPage() {
   const imp = impressionStyle[review.impression] ?? { bg: '#F3F4F6', color: '#909090' };
 
   const handleSatisfaction = (result: 'positive' | 'negative') => {
-    track(Events.REPORT_SATISFACTION, { result, review_id: id });
+    track(result === 'positive' ? Events.REVIEW_SATISFIED : Events.REVIEW_UNSATISFIED, { review_id: id });
     const updated = { ...review, satisfactionRating: result };
     setReview(updated);
     saveReview(updated);
@@ -56,7 +56,7 @@ export default function ReportPage() {
 
   const handleShare = async () => {
     const text = buildShareText(review);
-    track(Events.REPORT_SHARED, { share_method: 'copy', review_id: id });
+    track(Events.REVIEW_SHARED, { review_id: id });
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);

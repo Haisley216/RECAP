@@ -1,11 +1,13 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { track, Events } from '@/lib/analytics';
 
 export default function LoginPage() {
   const router = useRouter();
 
   const handleStart = () => {
+    track(Events.START_SERVICE);
     localStorage.setItem('rico_started', 'true');
     router.replace('/');
   };

@@ -117,7 +117,7 @@ export default function NewReviewPage() {
   useEffect(() => {
     if (!guide) return;
     const isPreset = guide.message.includes('자기소개') || guide.message.includes('지원 동기');
-    track(Events.AI_GUIDE_SHOWN, {
+    track(Events.AI_QUESTION_RECOMMENDED, {
       question_text: guide.questionText,
       guide_type: isPreset ? 'preset' : 'ai_dynamic',
     });
@@ -129,14 +129,12 @@ export default function NewReviewPage() {
     if (guide.questionText.includes('꼬리') || guide.message.includes('꼬리')) {
       tailQuestionShown.current = true;
     }
-    track(Events.AI_GUIDE_ACCEPTED, {
+    track(Events.AI_QUESTION_ADDED, {
       question_text: guide.questionText,
-      guide_type: 'ai_suggest',
       question_index: questions.length,
     });
     const newQ = createQuestion({ question: guide.questionText });
     aiGuidedIds.current.add(newQ.id);
-    track(Events.QUESTION_ADDED, { source: 'ai_guide', question_index: questions.length });
     setQuestions((prev) => [...prev, newQ]);
     setEditingId(newQ.id);
     setGuide(null);
@@ -145,7 +143,7 @@ export default function NewReviewPage() {
 
   const addQuestion = () => {
     const newQ = createQuestion();
-    track(Events.QUESTION_ADDED, { source: 'manual', question_index: questions.length });
+    track(Events.QUESTION_ADDED, { question_index: questions.length });
     setQuestions((prev) => [...prev, newQ]);
     setEditingId(newQ.id);
     setTimeout(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 100);
@@ -161,9 +159,8 @@ export default function NewReviewPage() {
       if (q && !q.question.trim()) {
         setQuestions((prev) => prev.filter((q) => q.id !== editingId));
       } else if (q) {
-        const source = aiGuidedIds.current.has(editingId) ? 'ai_guide' : 'manual';
-        track(Events.QUESTION_COMPLETED, {
-          source,
+        const isAiGuided = aiGuidedIds.current.has(editingId);
+        track(isAiGuided ? Events.AI_QUESTION_COMPLETED : Events.QUESTION_COMPLETED, {
           has_answer: q.answer.trim().length > 0,
           answer_length: q.answer.trim().length,
           tag_count: q.tags.length,
@@ -175,17 +172,10 @@ export default function NewReviewPage() {
 
   const goNext = () => {
     if (step === 1) {
-      if (company.trim() && position.trim()) {
-        track(Events.STEP1_SECTION_COMPLETE, { section: 'company' });
-      }
-      if (interviewRound || interviewerType || interviewFormat) {
-        track(Events.STEP1_SECTION_COMPLETE, { section: 'format' });
-      }
-      if (atmosphere || impression) {
-        track(Events.STEP1_SECTION_COMPLETE, { section: 'atmosphere' });
-      }
+      track(Events.STEP1_COMPLETED);
+    } else if (step === 2) {
+      track(Events.STEP2_COMPLETED);
     }
-    track(Events.STEP_COMPLETE, { step_number: step });
     setStep((s) => s + 1);
     setEditingId(null);
     scrollRef.current?.scrollTo({ top: 0 });
@@ -208,7 +198,7 @@ export default function NewReviewPage() {
   const canGoNext2 = filledQuestions.length > 0 && editingId === null;
 
   const handleCompleteReview = async () => {
-    track(Events.COMPLETE_REVIEW, { question_count: filledQuestions.length, tag_count: filledQuestions.reduce((n, q) => n + q.tags.length, 0) });
+    track(Events.STEP3_COMPLETED, { question_count: filledQuestions.length, tag_count: filledQuestions.reduce((n, q) => n + q.tags.length, 0) });
 
     const review: InterviewReview = {
       id: genId(),
