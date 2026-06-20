@@ -2,7 +2,6 @@
 
 import { Question, DEFAULT_TAGS } from '@/lib/types';
 import TagSelector from './TagSelector';
-import { track, Events } from '@/lib/analytics';
 
 interface QuestionItemProps {
   question: Question;
@@ -35,22 +34,6 @@ export default function QuestionItem({ question, index, onChange }: QuestionItem
         <TagSelector
           selected={question.tags}
           onChange={(tags) => {
-            if (tags.length > question.tags.length) {
-              const added = tags.find((t) => !question.tags.includes(t))!;
-              track(Events.TAG_ADDED, {
-                tag_name: added,
-                tag_type: DEFAULT_TAGS.includes(added) ? 'default' : 'custom',
-                question_index: index,
-                tag_count_after: tags.length,
-              });
-            } else if (tags.length < question.tags.length) {
-              const removed = question.tags.find((t) => !tags.includes(t))!;
-              track(Events.TAG_REMOVED, {
-                tag_name: removed,
-                tag_type: DEFAULT_TAGS.includes(removed) ? 'default' : 'custom',
-                question_index: index,
-              });
-            }
             onChange({ ...question, tags });
           }}
         />
