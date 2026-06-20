@@ -13,7 +13,7 @@ export default function HomePage() {
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
-    const isAnonymous = localStorage.getItem('anonymous') === 'true';
+    const isAnonymous = localStorage.getItem('rico_started') === 'true';
     if (!isAnonymous) {
       router.replace('/login');
       return;

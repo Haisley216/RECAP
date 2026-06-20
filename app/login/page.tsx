@@ -6,7 +6,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   const handleStart = () => {
-    localStorage.setItem('anonymous', 'true');
+    localStorage.setItem('rico_started', 'true');
     router.replace('/');
   };
 
