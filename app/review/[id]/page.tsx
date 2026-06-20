@@ -181,6 +181,8 @@ export default function ReportPage() {
 }
 
 function QuestionsTab({ review }: { review: InterviewReview }) {
+  const [openId, setOpenId] = useState<string | null>(null);
+
   if (review.questions.length === 0) {
     return (
       <p className="text-sm text-[#909090] text-center py-6">기록된 질문이 없어요</p>
@@ -188,13 +190,41 @@ function QuestionsTab({ review }: { review: InterviewReview }) {
   }
   return (
     <div className="space-y-[8px]">
-      {review.questions.map((q, i) => (
-        <div key={q.id} className="bg-[#f8f8f8] rounded-[10px] px-[22px] h-[46px] flex items-center">
-          <p className="text-[14px] font-semibold text-black truncate">
-            {q.question}
-          </p>
-        </div>
-      ))}
+      {review.questions.map((q) => {
+        const isOpen = openId === q.id;
+        return (
+          <button
+            key={q.id}
+            onClick={() => setOpenId(isOpen ? null : q.id)}
+            className="w-full text-left bg-[#f8f8f8] rounded-[10px] px-[22px] py-[13px] active:opacity-70 transition-opacity"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[14px] font-semibold text-black">{q.question}</p>
+              <span className={`text-[#999999] text-[18px] leading-none shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+                ›
+              </span>
+            </div>
+            {isOpen && (
+              <div className="mt-3 pt-3 border-t border-[#e8e8e8]">
+                {q.answer.trim() ? (
+                  <p className="text-[13px] text-[#444444] leading-relaxed whitespace-pre-wrap">{q.answer}</p>
+                ) : (
+                  <p className="text-[13px] text-[#999999]">입력된 답변이 없어요</p>
+                )}
+                {q.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                    {q.tags.map((tag) => (
+                      <span key={tag} className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-[#D9F8F6] text-[#00A59A]">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }
