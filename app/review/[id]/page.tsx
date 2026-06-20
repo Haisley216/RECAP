@@ -312,9 +312,9 @@ function FeedbackTab({
 
 function buildShareText(review: InterviewReview): string {
   const { aiReport } = review;
-  if (!aiReport) return `[RECAP] ${review.company} 면접 복기 완료`;
+  if (!aiReport) return `[rico] ${review.company} 면접 복기 완료`;
 
-  return `[RECAP] ${review.company} ${review.position} 면접 AI 분석
+  return `[rico] ${review.company} ${review.position} 면접 AI 분석
 
 📌 이번 면접 특성
 ${aiReport.interviewCharacteristics.map((c, i) => `${i + 1}. ${c}`).join('\n')}
@@ -328,5 +328,5 @@ ${aiReport.checklist.map((c) => `☐ ${c.item}`).join('\n')}
 💡 예상 응용 질문
 ${aiReport.expectedQuestions.map((q, i) => `Q${i + 1}. ${q}`).join('\n')}
 
-— RECAP AI 면접 회고 서비스`;
+— rico AI 면접 회고 서비스`;
 }

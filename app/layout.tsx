@@ -3,7 +3,7 @@ import './globals.css';
 import Providers from './providers';
 
 export const metadata: Metadata = {
-  title: 'RECAP — AI 면접 회고',
+  title: 'rico — AI 면접 회고',
   description: '면접 직후 기억을 빠르게 복기하고, AI가 다음 면접을 준비해드려요',
 };
 

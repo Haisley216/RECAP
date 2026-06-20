@@ -1,6 +1,6 @@
 'use client';
 
-import { Question } from '@/lib/types';
+import { Question, DEFAULT_TAGS } from '@/lib/types';
 import TagSelector from './TagSelector';
 import { track, Events } from '@/lib/analytics';
 
@@ -36,7 +36,20 @@ export default function QuestionItem({ question, index, onChange }: QuestionItem
           selected={question.tags}
           onChange={(tags) => {
             if (tags.length > question.tags.length) {
-              track(Events.TAG_ADDED, { tag_name: tags[tags.length - 1], question_index: index });
+              const added = tags.find((t) => !question.tags.includes(t))!;
+              track(Events.TAG_ADDED, {
+                tag_name: added,
+                tag_type: DEFAULT_TAGS.includes(added) ? 'default' : 'custom',
+                question_index: index,
+                tag_count_after: tags.length,
+              });
+            } else if (tags.length < question.tags.length) {
+              const removed = question.tags.find((t) => !tags.includes(t))!;
+              track(Events.TAG_REMOVED, {
+                tag_name: removed,
+                tag_type: DEFAULT_TAGS.includes(removed) ? 'default' : 'custom',
+                question_index: index,
+              });
             }
             onChange({ ...question, tags });
           }}

@@ -53,6 +53,7 @@ export default function NewReviewPage() {
   const shownGuides = useRef<Set<string>>(new Set());
   const suggestTimeout = useRef<NodeJS.Timeout | null>(null);
   const tailQuestionShown = useRef(false);
+  const aiGuidedIds = useRef<Set<string>>(new Set());
 
   // Step 3
   const [goodPoints, setGoodPoints] = useState('');
@@ -113,14 +114,29 @@ export default function NewReviewPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questions, step]);
 
+  useEffect(() => {
+    if (!guide) return;
+    const isPreset = guide.message.includes('자기소개') || guide.message.includes('지원 동기');
+    track(Events.AI_GUIDE_SHOWN, {
+      question_text: guide.questionText,
+      guide_type: isPreset ? 'preset' : 'ai_dynamic',
+    });
+  }, [guide]);
+
   const handleGuideAccept = () => {
     if (!guide) return;
     shownGuides.current.add(guide.message);
     if (guide.questionText.includes('꼬리') || guide.message.includes('꼬리')) {
       tailQuestionShown.current = true;
     }
-    track(Events.AI_GUIDE_ACCEPTED, { guide_type: 'ai_suggest', question_index: questions.length });
+    track(Events.AI_GUIDE_ACCEPTED, {
+      question_text: guide.questionText,
+      guide_type: 'ai_suggest',
+      question_index: questions.length,
+    });
     const newQ = createQuestion({ question: guide.questionText });
+    aiGuidedIds.current.add(newQ.id);
+    track(Events.QUESTION_ADDED, { source: 'ai_guide', question_index: questions.length });
     setQuestions((prev) => [...prev, newQ]);
     setEditingId(newQ.id);
     setGuide(null);
@@ -129,6 +145,7 @@ export default function NewReviewPage() {
 
   const addQuestion = () => {
     const newQ = createQuestion();
+    track(Events.QUESTION_ADDED, { source: 'manual', question_index: questions.length });
     setQuestions((prev) => [...prev, newQ]);
     setEditingId(newQ.id);
     setTimeout(() => scrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 100);
@@ -143,12 +160,31 @@ export default function NewReviewPage() {
       const q = questions.find((q) => q.id === editingId);
       if (q && !q.question.trim()) {
         setQuestions((prev) => prev.filter((q) => q.id !== editingId));
+      } else if (q) {
+        const source = aiGuidedIds.current.has(editingId) ? 'ai_guide' : 'manual';
+        track(Events.QUESTION_COMPLETED, {
+          source,
+          has_answer: q.answer.trim().length > 0,
+          answer_length: q.answer.trim().length,
+          tag_count: q.tags.length,
+        });
       }
     }
     setEditingId(null);
   };
 
   const goNext = () => {
+    if (step === 1) {
+      if (company.trim() && position.trim()) {
+        track(Events.STEP1_SECTION_COMPLETE, { section: 'company' });
+      }
+      if (interviewRound || interviewerType || interviewFormat) {
+        track(Events.STEP1_SECTION_COMPLETE, { section: 'format' });
+      }
+      if (atmosphere || impression) {
+        track(Events.STEP1_SECTION_COMPLETE, { section: 'atmosphere' });
+      }
+    }
     track(Events.STEP_COMPLETE, { step_number: step });
     setStep((s) => s + 1);
     setEditingId(null);
@@ -156,7 +192,10 @@ export default function NewReviewPage() {
   };
 
   const goBack = () => {
-    if (step > 1) {
+    if (step === 2 && editingId !== null) {
+      completeEdit();
+      scrollRef.current?.scrollTo({ top: 0 });
+    } else if (step > 1) {
       setStep((s) => s - 1);
       scrollRef.current?.scrollTo({ top: 0 });
     } else {

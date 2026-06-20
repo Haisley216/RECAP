@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { Plus, X } from 'lucide-react';
 import { DEFAULT_TAGS } from '@/lib/types';
 import { getCustomTags, saveCustomTag } from '@/lib/storage';
+import { track, Events } from '@/lib/analytics';
 
 interface TagSelectorProps {
   selected: string[];
@@ -34,6 +35,7 @@ export default function TagSelector({ selected, onChange }: TagSelectorProps) {
     saveCustomTag(trimmed);
     setCustomTags((prev) => [...prev, trimmed]);
     onChange([...selected, trimmed]);
+    track(Events.CUSTOM_TAG_CREATED, { tag_name: trimmed });
     setNewTag('');
     setAdding(false);
   };
