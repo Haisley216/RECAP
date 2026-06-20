@@ -65,7 +65,7 @@ feedback·checklist·expectedQuestions는 각 최대 5개.`;
 
   try {
     const message = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       max_tokens: 2048,
       messages: [
         { role: 'system', content: systemPrompt },
