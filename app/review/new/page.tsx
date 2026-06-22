@@ -60,6 +60,41 @@ export default function NewReviewPage() {
   const [badPoints, setBadPoints] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const DRAFT_KEY = 'recap_new_draft';
+
+  // 드래프트 복원
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      if (d.step) setStep(d.step);
+      if (d.company) setCompany(d.company);
+      if (d.position) setPosition(d.position);
+      if (d.interviewRound) setInterviewRound(d.interviewRound);
+      if (d.interviewerType) setInterviewerType(d.interviewerType);
+      if (d.interviewFormat) setInterviewFormat(d.interviewFormat);
+      if (d.atmosphere) setAtmosphere(d.atmosphere);
+      if (d.impression) setImpression(d.impression);
+      if (d.openSection) setOpenSection(d.openSection);
+      if (d.questions) setQuestions(d.questions);
+      if (d.goodPoints !== undefined) setGoodPoints(d.goodPoints);
+      if (d.badPoints !== undefined) setBadPoints(d.badPoints);
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 드래프트 저장
+  useEffect(() => {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        step, company, position, interviewRound, interviewerType, interviewFormat,
+        atmosphere, impression, openSection, questions, goodPoints, badPoints,
+      }));
+    } catch {}
+  }, [step, company, position, interviewRound, interviewerType, interviewFormat,
+      atmosphere, impression, openSection, questions, goodPoints, badPoints]);
+
   useEffect(() => {
     if (step !== 2) return;
 
@@ -216,6 +251,7 @@ export default function NewReviewPage() {
     };
 
     saveReview(review);
+    localStorage.removeItem(DRAFT_KEY);
     setLoading(true);
 
     try {
